@@ -1,0 +1,34 @@
+import { PrismaClient } from '@prisma/client';
+
+import { logger } from '@/utils/logger';
+
+const prismaClientSingleton = () => {
+    return new PrismaClient({
+        log: [
+            { level: 'query', emit: 'event' },
+            { level: 'error', emit: 'event' },
+            { level: 'warn', emit: 'event' },
+        ],
+    });
+};
+
+declare global {
+    var prismaGlobal: undefined | ReturnType<typeof prismaClientSingleton>;
+}
+
+export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') {
+    globalThis.prismaGlobal = prisma;
+}
+
+// Logging
+prisma.$on('query', (e) => {
+    if (process.env.NODE_ENV === 'development') {
+        logger.debug('Query', { query: e.query, params: e.params, duration: e.duration });
+    }
+});
+
+prisma.$on('error', (e) => {
+    logger.error('Database error', { message: e.message, target: e.target });
+});

@@ -1,0 +1,56 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": [
+            "ESNext"
+        ],
+        "moduleResolution": "bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "baseUrl": "./src",
+        "paths": {
+            "@/*": [
+                "./*"
+            ],
+            "@config/*": [
+                "./config/*"
+            ],
+            "@modules/*": [
+                "./modules/*"
+            ],
+            "@middlewares/*": [
+                "./middlewares/*"
+            ],
+            "@services/*": [
+                "./services/*"
+            ],
+            "@repositories/*": [
+                "./repositories/*"
+            ],
+            "@utils/*": [
+                "./utils/*"
+            ],
+            "@types/*": [
+                "./types/*"
+            ]
+        },
+        "types": [
+            "bun-types"
+        ]
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}
