@@ -326,6 +326,29 @@ export class AuthService {
         });
     }
 
+    async changePassword(userId: string, data: any) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            throw new NotFoundError('User not found');
+        }
+
+        const isPasswordValid = await argon2.verify(user.passwordHash, data.currentPassword);
+
+        if (!isPasswordValid) {
+            throw new UnauthorizedError('Invalid current password');
+        }
+
+        const passwordHash = await argon2.hash(data.newPassword);
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: { passwordHash },
+        });
+    }
+
     private generateRandomCode(length: number): string {
         const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let result = '';

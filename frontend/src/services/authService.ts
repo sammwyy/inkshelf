@@ -24,5 +24,8 @@ export const authService = {
   },
   async confirmEmailVerification(code: string): Promise<void> {
     await apiClient.post('/auth/verify-email/confirm', { code });
+  },
+  async changePassword(data: any): Promise<void> {
+    await apiClient.post('/auth/password/change', data);
   }
 };

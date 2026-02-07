@@ -91,6 +91,14 @@ export class AuthController {
         });
     });
 
+    changePassword = asyncHandler(async (req: AuthRequest, res: Response) => {
+        await this.authService.changePassword(req.user!.userId, req.body);
+
+        return ApiResponse.success(res, {
+            message: 'Password changed successfully',
+        });
+    });
+
     me = asyncHandler(async (req: AuthRequest, res: Response) => {
         const user = await this.authService.getCurrentUser(req.user!.userId);
 

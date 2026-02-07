@@ -18,7 +18,7 @@ export class SeriesController {
         let series = await this.seriesService.createSeries(req.body);
 
         if (req.file) {
-            const coverPath = `series/${series.id}/thumbnail.webp`;
+            const coverPath = `series/${series.id}/thumbnail.jpg`;
             const coverUrl = await this.storageService.upload(req.file.buffer, coverPath, req.file.mimetype);
             series = await this.seriesService.updateSeries(series.id, { coverImage: coverUrl });
         }
@@ -45,7 +45,7 @@ export class SeriesController {
         let data = req.body;
 
         if (req.file) {
-            const coverPath = `series/${req.params.id}/thumbnail.webp`;
+            const coverPath = `series/${req.params.id}/thumbnail.jpg`;
             const coverUrl = await this.storageService.upload(req.file.buffer, coverPath, req.file.mimetype);
             data = { ...data, coverImage: coverUrl };
         }

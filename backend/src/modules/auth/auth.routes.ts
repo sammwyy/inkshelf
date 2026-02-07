@@ -10,6 +10,7 @@ import {
     requestPasswordResetSchema,
     resetPasswordSchema,
     verifyEmailSchema,
+    changePasswordSchema,
 } from './auth.schema';
 
 import { checkSignupMode } from '@/middlewares/settings.middleware';
@@ -23,6 +24,7 @@ router.post('/refresh', validate(refreshTokenSchema), authController.refresh);
 router.post('/logout', authController.logout);
 router.post('/password-reset/request', authRateLimiter, validate(requestPasswordResetSchema), authController.requestPasswordReset);
 router.post('/password-reset/confirm', authRateLimiter, validate(resetPasswordSchema), authController.resetPassword);
+router.post('/password/change', authenticate, validate(changePasswordSchema), authController.changePassword);
 router.get('/me', authenticate, authController.me);
 
 // Email verification

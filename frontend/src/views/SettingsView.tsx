@@ -84,10 +84,120 @@ const SettingsView: React.FC = () => {
     const sections = [
         { id: 'profile', label: 'Profile', icon: User },
         { id: 'privacy', label: 'Privacy', icon: Lock },
+        { id: 'security', label: 'Security', icon: Shield },
         { id: 'appearance', label: 'Appearance', icon: Palette },
     ];
 
     const [activeSection, setActiveSection] = useState('profile');
+
+    const ChangePasswordForm = () => {
+        const [currentPassword, setCurrentPassword] = useState('');
+        const [newPassword, setNewPassword] = useState('');
+        const [confirmPassword, setConfirmPassword] = useState('');
+        const [isLoading, setIsLoading] = useState(false);
+        const [msg, setMsg] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+        const [showCurrent, setShowCurrent] = useState(false);
+        const [showNew, setShowNew] = useState(false);
+        const { logout } = useAuth(); // Optional: logout after password change? Or just notify.
+
+        const handleSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+            if (newPassword !== confirmPassword) {
+                setMsg({ type: 'error', text: 'New passwords do not match' });
+                return;
+            }
+            if (newPassword.length < 8) {
+                setMsg({ type: 'error', text: 'Password must be at least 8 characters' });
+                return;
+            }
+
+            setIsLoading(true);
+            setMsg(null);
+
+            try {
+                // We need to import authService dynamically or move it to top if no cycle
+                // Importing authService from services/authService
+                const { authService } = await import('../services/authService');
+                await authService.changePassword({ currentPassword, newPassword });
+                setMsg({ type: 'success', text: 'Password changed successfully' });
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            } catch (err: any) {
+                setMsg({ type: 'error', text: err.response?.data?.error || 'Failed to change password' });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        return (
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {msg && (
+                    <div className={`p-4 rounded-2xl flex items-center gap-3 text-sm ${msg.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                        {msg.type === 'success' ? <Check size={18} /> : <AlertCircle size={18} />}
+                        {msg.text}
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Current Password</label>
+                        <div className="relative">
+                            <input
+                                type={showCurrent ? 'text' : 'password'}
+                                value={currentPassword}
+                                onChange={e => setCurrentPassword(e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-white pr-12"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowCurrent(!showCurrent)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                            >
+                                {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">New Password</label>
+                        <div className="relative">
+                            <input
+                                type={showNew ? 'text' : 'password'}
+                                value={newPassword}
+                                onChange={e => setNewPassword(e.target.value)}
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-white pr-12"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNew(!showNew)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                            >
+                                {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Confirm New Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-white"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <Button type="submit" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Update Password'}
+                </Button>
+            </form>
+        );
+    };
 
     const renderProfile = () => (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -278,6 +388,17 @@ const SettingsView: React.FC = () => {
         </div>
     );
 
+    const renderSecurity = () => (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-10 max-w-xl">
+            <div className="space-y-1">
+                <h2 className="text-lg font-bold text-white">Security</h2>
+                <p className="text-zinc-500 text-sm">Manage your password and account security.</p>
+            </div>
+
+            <ChangePasswordForm />
+        </div>
+    );
+
     return (
         <Layout>
             <div className="container mx-auto px-0 md:px-4 py-6 md:py-24 max-w-5xl">
@@ -325,12 +446,15 @@ const SettingsView: React.FC = () => {
                             <div className="h-px bg-zinc-800/50 w-full" />
                             {renderPrivacy()}
                             <div className="h-px bg-zinc-800/50 w-full" />
+                            {renderSecurity()}
+                            <div className="h-px bg-zinc-800/50 w-full" />
                             {renderAppearance()}
                         </div>
 
                         <div className="hidden md:block">
                             {activeSection === 'profile' && renderProfile()}
                             {activeSection === 'privacy' && renderPrivacy()}
+                            {activeSection === 'security' && renderSecurity()}
                             {activeSection === 'appearance' && renderAppearance()}
                         </div>
                     </main>

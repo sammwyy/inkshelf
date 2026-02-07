@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Edit, Ban, CheckCircle, XCircle, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Search, Edit, Ban, CheckCircle, XCircle, Eye, EyeOff, UserPlus, Loader2 } from 'lucide-react';
 import { usersService } from '../../services/usersService';
 import { User, Role } from '../../lib/types/api';
 
@@ -15,8 +15,51 @@ const UsersManagement: React.FC = () => {
         total: 0,
         totalPages: 0,
     });
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editForm, setEditForm] = useState({
+        username: '',
+        email: '',
+        role: Role.USER,
+        password: '',
+    });
+    const [isSaving, setIsSaving] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+
+
+    const handleEditClick = (user: User) => {
+        setEditingUser(user);
+        setEditForm({
+            username: user.profile?.username || '',
+            email: user.email,
+            role: user.role,
+            password: '',
+        });
+    };
+
+    const handleSaveUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingUser) return;
+        setIsSaving(true);
+        try {
+            const updates: any = {};
+            if (editForm.username !== editingUser.profile?.username) updates.username = editForm.username;
+            if (editForm.email !== editingUser.email) updates.email = editForm.email;
+            if (editForm.role !== editingUser.role) updates.role = editForm.role;
+            if (editForm.password) updates.password = editForm.password;
+
+            if (Object.keys(updates).length > 0) {
+                await usersService.update(editingUser.id, updates);
+                await fetchUsers(); // This assumes fetchUsers is in scope, which it is
+            }
+            setEditingUser(null);
+        } catch (error) {
+            alert('Failed to update user');
+            console.error(error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -53,7 +96,76 @@ const UsersManagement: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-150">
+        <div className="space-y-6 animate-in fade-in duration-150 relative">
+            {editingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Edit User</h3>
+                            <button onClick={() => setEditingUser(null)} className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSaveUser} className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Username</label>
+                                <input
+                                    type="text"
+                                    value={editForm.username}
+                                    onChange={e => setEditForm({ ...editForm, username: e.target.value })}
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-zinc-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Email</label>
+                                <input
+                                    type="email"
+                                    value={editForm.email}
+                                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-zinc-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Role</label>
+                                <select
+                                    value={editForm.role}
+                                    onChange={e => setEditForm({ ...editForm, role: e.target.value as Role })}
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-zinc-900 dark:text-white"
+                                >
+                                    <option value={Role.USER}>User</option>
+                                    <option value={Role.ADMIN}>Admin</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-zinc-500 ml-1">Password (Leave blank to keep)</label>
+                                <input
+                                    type="password"
+                                    value={editForm.password}
+                                    onChange={e => setEditForm({ ...editForm, password: e.target.value })}
+                                    placeholder="New Password"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-pink-500 transition-all text-sm text-zinc-900 dark:text-white"
+                                />
+                            </div>
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingUser(null)}
+                                    className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="flex-1 px-4 py-2.5 rounded-xl bg-pink-500 text-white font-semibold text-sm hover:bg-pink-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                >
+                                    {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
             <div className="flex items-center justify-between gap-4 bg-white dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800">
                 <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
@@ -131,7 +243,11 @@ const UsersManagement: React.FC = () => {
                                     </td>
                                     <td className="py-4 px-6 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                                            <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" title="Edit">
+                                            <button
+                                                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                                                title="Edit"
+                                                onClick={() => handleEditClick(user)}
+                                            >
                                                 <Edit size={16} />
                                             </button>
                                             {user.bannedAt ? (

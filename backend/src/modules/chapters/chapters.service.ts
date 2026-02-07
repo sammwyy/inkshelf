@@ -15,7 +15,7 @@ export class ChaptersService {
         const chapter = await prisma.chapter.findUnique({ where: { id } });
         if (!chapter) throw new NotFoundError('Chapter not found');
 
-        const path = `series/${chapter.seriesId}/chapters/${id}/thumbnail.webp`;
+        const path = `series/${chapter.seriesId}/chapters/${id}/thumbnail.jpg`;
         return this.storageService.upload(file.buffer, path, file.mimetype);
     }
 
@@ -179,7 +179,7 @@ export class ChaptersService {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             // Path format: series/{seriesId}/chapters/{chapterId}/page_{index}.webp
-            const path = `series/${chapter.seriesId}/chapters/${id}/page_${startOffset + i + 1}.webp`;
+            const path = `series/${chapter.seriesId}/chapters/${id}/page_${startOffset + i + 1}.jpg`;
 
             const url = await this.storageService.upload(file.buffer, path, file.mimetype);
             pageUrls.push(url);

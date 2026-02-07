@@ -28,9 +28,15 @@ export const verifyEmailSchema = z.object({
     code: z.string().length(6, 'Verification code must be 6 characters'),
 });
 
+export const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string().min(8, 'Password must be at least 8 characters').regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase and number'),
+});
+
 export type SignupDto = z.infer<typeof signupSchema>;
 export type LoginDto = z.infer<typeof loginSchema>;
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>;
 export type RequestPasswordResetDto = z.infer<typeof requestPasswordResetSchema>;
 export type ResetPasswordDto = z.infer<typeof resetPasswordSchema>;
 export type VerifyEmailDto = z.infer<typeof verifyEmailSchema>;
+export type ChangePasswordDto = z.infer<typeof changePasswordSchema>;

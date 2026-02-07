@@ -9,7 +9,7 @@ export class StorageService {
     };
 
     private maxFileSizes = {
-        image: 5 * 1024 * 1024, // 5MB
+        image: 10 * 1024 * 1024, // 5MB
         document: 10 * 1024 * 1024, // 10MB
     };
 
@@ -29,21 +29,21 @@ export class StorageService {
         }
 
         if (type === 'image') {
-            // Convert to WebP
+            // Convert to JPEG for better performance and larger dimension support
             buffer = await sharp(file)
-                .webp({ quality: 80 })
+                .jpeg({ quality: 80, mozjpeg: true })
                 .toBuffer();
 
             // Allow replacing extension if it's an image
-            if (!finalPath.endsWith('.webp')) {
+            if (!finalPath.match(/\.(jpg|jpeg)$/i)) {
                 const lastDot = finalPath.lastIndexOf('.');
                 if (lastDot > -1) {
-                    finalPath = finalPath.substring(0, lastDot) + '.webp';
+                    finalPath = finalPath.substring(0, lastDot) + '.jpg';
                 } else {
-                    finalPath = finalPath + '.webp';
+                    finalPath = finalPath + '.jpg';
                 }
             }
-            finalMimeType = 'image/webp';
+            finalMimeType = 'image/jpeg';
         }
 
         await storage.upload(buffer, finalPath, finalMimeType);
