@@ -18,12 +18,22 @@ const DEFAULT_SETTINGS: SystemSettings = {
     app_custom_js: '',
 };
 
+const DEFAULT_PRIVATE_SETTINGS: PrivateSystemSettings = {
+    // Add private settings defaults here if needed
+};
+
+export interface PrivateSystemSettings {
+    // Define private settings types here
+}
+
 export class SettingsService {
     /**
-     * Get all settings merged with defaults
+     * Get all public settings merged with defaults
      */
     static async getAllSettings(): Promise<SystemSettings> {
-        const dbSettings = await prisma.systemSetting.findMany();
+        const dbSettings = await prisma.systemSetting.findMany({
+            where: { isPrivate: false }
+        });
         const settingsMap = dbSettings.reduce((acc: Record<string, any>, curr: any) => {
             acc[curr.key] = curr.value;
             return acc;
@@ -35,6 +45,23 @@ export class SettingsService {
             app_title: settingsMap['app_title'] ?? DEFAULT_SETTINGS.app_title,
             app_custom_css: settingsMap['app_custom_css'] ?? DEFAULT_SETTINGS.app_custom_css,
             app_custom_js: settingsMap['app_custom_js'] ?? DEFAULT_SETTINGS.app_custom_js,
+        };
+    }
+
+    /**
+     * Get all private settings
+     */
+    static async getPrivateSettings(): Promise<SystemSettings & PrivateSystemSettings> {
+        const dbSettings = await prisma.systemSetting.findMany(); // All settings (public + private)
+        const settingsMap = dbSettings.reduce((acc: Record<string, any>, curr: any) => {
+            acc[curr.key] = curr.value;
+            return acc;
+        }, {} as Record<string, any>);
+
+        return {
+            ...DEFAULT_SETTINGS,
+            ...DEFAULT_PRIVATE_SETTINGS,
+            ...settingsMap
         };
     }
 
@@ -56,11 +83,11 @@ export class SettingsService {
     /**
      * Update or create a setting
      */
-    static async updateSetting(key: string, value: any): Promise<void> {
+    static async updateSetting(key: string, value: any, isPrivate: boolean = false): Promise<void> {
         await prisma.systemSetting.upsert({
             where: { key },
-            update: { value, updatedAt: new Date() },
-            create: { key, value },
+            update: { value, isPrivate, updatedAt: new Date() },
+            create: { key, value, isPrivate },
         });
     }
 }

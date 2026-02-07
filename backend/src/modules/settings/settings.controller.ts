@@ -21,4 +21,21 @@ export class SettingsController {
         await SettingsService.updateSetting(key, value);
         return ApiResponse.success(res, { message: `Setting ${key} updated successfully` });
     });
+
+    /**
+     * Get all private settings (Admin only)
+     */
+    getPrivate = asyncHandler(async (req: Request, res: Response) => {
+        const settings = await SettingsService.getPrivateSettings();
+        return ApiResponse.success(res, settings);
+    });
+
+    /**
+     * Update a private setting (Admin only)
+     */
+    updatePrivate = asyncHandler(async (req: Request, res: Response) => {
+        const { key, value } = req.body;
+        await SettingsService.updateSetting(key, value, true);
+        return ApiResponse.success(res, { message: `Private setting ${key} updated successfully` });
+    });
 }

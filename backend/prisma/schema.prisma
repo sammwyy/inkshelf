@@ -343,6 +343,7 @@ model UserListItem {
 model SystemSetting {
   key       String   @id
   value     Json
+  isPrivate Boolean  @default(false) @map("is_private")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("system_settings")
