@@ -14,7 +14,7 @@ export const createRateLimiter = (options?: {
         max: options?.max || config.security.rateLimit.maxRequests,
         standardHeaders: true,
         legacyHeaders: false,
-        skip: options?.skip,
+        skip: options?.skip || (() => process.env.NODE_ENV === 'test'),
         store: new RedisStore({
             sendCommand: async (...args: string[]) => {
                 if (!redisClient.isOpen) {

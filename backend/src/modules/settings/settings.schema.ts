@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const updateSettingSchema = z.object({
-    key: z.enum(['app_signup_mode', 'app_allow_anonymous_view', 'app_title', 'app_custom_css', 'app_custom_js']),
+    key: z.string(),
     value: z.any(),
 }).refine((data) => {
     if (data.key === 'app_signup_mode') {

@@ -44,10 +44,12 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "eslint": "^8.56.0",
     "prisma": "^5.9.1",
+    "supertest": "^7.2.2",
     "typescript": "^5.3.3"
   }
 }
