@@ -1,0 +1,65 @@
+services:
+  inkshelf:
+    build: .
+    container_name: inkshelf
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - STORAGE_TYPE=local
+      - STORAGE_LOCAL_PATH=/app/uploads
+      - SERVE_STATIC=true
+    volumes:
+      - ${STORAGE_PATH}:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - inkshelf-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: inkshelf-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - inkshelf-db-data:/var/lib/postgresql/data
+    networks:
+      - inkshelf-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: inkshelf-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - inkshelf-redis-data:/data
+    networks:
+      - inkshelf-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  inkshelf-network:
+    driver: bridge
+
+volumes:
+  inkshelf-db-data:
+  inkshelf-redis-data:

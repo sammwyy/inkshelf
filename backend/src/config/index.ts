@@ -60,4 +60,6 @@ export const config = {
         ratingsEnabled: env.FEATURE_RATINGS_ENABLED,
         publicListsEnabled: env.FEATURE_PUBLIC_LISTS_ENABLED,
     },
+
+    serveStatic: env.SERVE_STATIC,
 } as const;

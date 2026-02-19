@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun",
+    "build": "bun build src/index.ts --outdir dist --target bun --external mock-aws-s3 --external aws-sdk --external nock --external argon2 --external sharp",
     "start": "bun dist/index.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

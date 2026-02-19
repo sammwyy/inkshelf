@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import 'express-async-errors';
 import { config } from '@/config/index';
 import { securityHeaders } from '@/middlewares/security.middleware';
@@ -32,6 +33,18 @@ app.set('trust proxy', 1);
 
 // Routes
 app.use('/api/v1', routes);
+
+// Static files (frontend)
+if (config.serveStatic) {
+    const publicPath = path.resolve('public');
+    app.use(express.static(publicPath));
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(publicPath, 'index.html'));
+    });
+}
 
 // Error handling
 app.use(notFoundHandler);

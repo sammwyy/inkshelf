@@ -44,6 +44,9 @@ const envSchema = z.object({
     FEATURE_COMMENTS_ENABLED: z.string().transform(val => val === 'true').default('true'),
     FEATURE_RATINGS_ENABLED: z.string().transform(val => val === 'true').default('true'),
     FEATURE_PUBLIC_LISTS_ENABLED: z.string().transform(val => val === 'true').default('true'),
+
+    // Global
+    SERVE_STATIC: z.string().transform(val => val === 'true').default('false'),
 });
 
 export type Env = z.infer<typeof envSchema>;

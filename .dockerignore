@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.git
+.gitignore
+*.md
+deploy*.sh
+docker-compose.yml
+backend/node_modules
+backend/dist
+frontend/node_modules
+frontend/dist
+uploads
+public
