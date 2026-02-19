@@ -1,28 +1,24 @@
-# Stage 1: Build everything
-FROM oven/bun:1 AS builder
+FROM oven/bun:latest
+
 WORKDIR /app
+
+# Copy package.json and bun.lock
+COPY package.json bun.lock ./
+
+# Install dependencies
+RUN bun install
+
+# Copy source code
 COPY . .
-RUN chmod +x build.sh && ./build.sh
 
-# Stage 2: Production
-FROM oven/bun:1
-WORKDIR /app
-
-# Copy the pre-assembled dist folder from the builder
-COPY --from=builder /app/dist ./
-
-# Install production dependencies
-# Since package.json and bun.lock were copied into dist/ during build.sh
-RUN bun install --production
-
-# Generate Prisma client for production
+# Generate Prisma client
 RUN bun run db:generate
 
-# Final environment configuration
-ENV NODE_ENV=production
-ENV SERVE_STATIC=true
-ENV PORT=3000
+# Build the app
+RUN bun run build
 
+# Expose port
 EXPOSE 3000
 
-CMD ["bun", "index.js"]
+# Start the app
+CMD ["bun", "run", "start"]

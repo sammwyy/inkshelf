@@ -12,11 +12,12 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - APP_PATH=/app/data
       - STORAGE_TYPE=local
-      - STORAGE_LOCAL_PATH=/app/uploads
-      - SERVE_STATIC=true
+      - DATABASE_TYPE=postgresql
+      - CACHE_TYPE=redis
     volumes:
-      - ${STORAGE_PATH}:/app/uploads
+      - ${STORAGE_PATH}:/app/data
     depends_on:
       db:
         condition: service_healthy

@@ -1,2 +1,6 @@
 .env
 node_modules
+uploads
+logs
+data/
+dist/

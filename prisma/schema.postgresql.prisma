@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SeriesStatus {
+  ONGOING
+  COMPLETED
+  HIATUS
+  CANCELLED
+}
+
+enum ChapterLanguage {
+  EN
+  ES
+  FR
+  DE
+  IT
+  PT
+  JA
+  KO
+  ZH_CN
+  ZH_TW
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(USER)
+  isActive      Boolean  @default(true)
+  emailVerified Boolean  @default(false)
+  emailVerificationCode String?
+  emailVerificationSentAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+  bannedAt      DateTime?
+  banReason     String?
+
+  // Relations
+  profile          UserProfile?
+  preferences      UserPreferences?
+  refreshTokens    RefreshToken[]
+  passwordResets   PasswordReset[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  username  String   @unique
+  bio       String?  @db.Text
+  avatar    String?
+  location  String?
+  website   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relations
+  readingProgress  ReadingProgress[]
+  favorites        Favorite[]
+  readingHistory   ReadingHistory[]
+  ratings          Rating[]
+  comments         Comment[]
+  lists            UserList[]
+
+  @@index([username])
+  @@map("user_profiles")
+}
+
+model UserPreferences {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  isProfilePublic   Boolean  @default(true)
+  showFavorites     Boolean  @default(true)
+  showRatings       Boolean  @default(true)
+  showComments      Boolean  @default(true)
+  showLists         Boolean  @default(true)
+  showProgress      Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model Series {
+  id          String       @id @default(uuid())
+  slug        String       @unique
+  title       String
+  alternativeTitles String[] @default([])
+  description String       @db.Text
+  author      String
+  artist      String?
+  status      SeriesStatus @default(ONGOING)
+  coverImage  String?
+  tags        String[]     @default([])
+  year        Int?
+  rating      Float        @default(0)
+  ratingCount Int          @default(0)
+  viewCount   Int          @default(0)
+  isPublished Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  volumes         Volume[]
+  chapters        Chapter[]
+  favorites       Favorite[]
+  ratings         Rating[]
+  readingHistory  ReadingHistory[]
+  userLists       UserListItem[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([createdAt])
+  @@index([rating])
+  @@map("series")
+}
+
+model Volume {
+  id          String    @id @default(uuid())
+  seriesId    String
+  number      Int
+  title       String?
+  coverImage  String?
+  description String?   @db.Text
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  series   Series    @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  chapters Chapter[]
+
+  @@unique([seriesId, number])
+  @@index([seriesId])
+  @@map("volumes")
+}
+
+model Chapter {
+  id              String          @id @default(uuid())
+  seriesId        String
+  volumeId        String?
+  number          Float
+  title           String?
+  language        ChapterLanguage @default(EN)
+  releaseGroup    String?
+  publishedAt     DateTime        @default(now())
+  pageCount       Int             @default(0)
+  pages           String[]        @default([])
+  viewCount       Int             @default(0)
+  isPublished     Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  series          Series            @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  volume          Volume?           @relation(fields: [volumeId], references: [id], onDelete: SetNull)
+  readingProgress ReadingProgress[]
+  readingHistory  ReadingHistory[]
+  comments        Comment[]
+
+  @@unique([seriesId, number, language, releaseGroup])
+  @@index([seriesId])
+  @@index([volumeId])
+  @@index([publishedAt])
+  @@index([language])
+  @@map("chapters")
+}
+
+model ReadingProgress {
+  id         String   @id @default(uuid())
+  profileId  String
+  chapterId  String
+  currentPage Int     @default(0)
+  totalPages  Int     @default(0)
+  isCompleted Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  chapter Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, chapterId])
+  @@index([profileId])
+  @@index([chapterId])
+  @@index([updatedAt])
+  @@map("reading_progress")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  profileId String
+  seriesId  String
+  createdAt DateTime @default(now())
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  series  Series      @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, seriesId])
+  @@index([profileId])
+  @@index([seriesId])
+  @@map("favorites")
+}
+
+model ReadingHistory {
+  id        String   @id @default(uuid())
+  profileId String
+  seriesId  String
+  chapterId String
+  readAt    DateTime @default(now())
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  series  Series      @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  chapter Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, readAt])
+  @@index([seriesId])
+  @@map("reading_history")
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  profileId String
+  seriesId  String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  series  Series      @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, seriesId])
+  @@index([profileId])
+  @@index([seriesId])
+  @@map("ratings")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  profileId String
+  chapterId String
+  parentId  String?
+  content   String   @db.Text
+  isEdited  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  chapter Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  parent  Comment?    @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]   @relation("CommentReplies")
+
+  @@index([profileId])
+  @@index([chapterId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model UserList {
+  id          String   @id @default(uuid())
+  profileId   String
+  name        String
+  description String?  @db.Text
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile UserProfile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items   UserListItem[]
+
+  @@index([profileId])
+  @@index([isPublic])
+  @@map("user_lists")
+}
+
+model UserListItem {
+  id        String   @id @default(uuid())
+  listId    String
+  seriesId  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  list   UserList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  series Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, seriesId])
+  @@index([listId])
+  @@index([seriesId])
+  @@map("user_list_items")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  isPrivate Boolean  @default(false) @map("is_private")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
