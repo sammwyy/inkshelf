@@ -1,14 +1,18 @@
 import { z } from 'zod';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
 
 const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
     // App
     APP_PATH: z.string().default('./data'),
-    PORT: z.string().transform(Number).default('3000'),
+    PORT: z.string().transform(Number).default('8642'),
 
     // Database
-    DATABASE_TYPE: z.enum(['postgresql', 'sqlite']).default('postgresql'),
+    DATABASE_TYPE: z.enum(['postgresql', 'sqlite']).default('sqlite'),
     DATABASE_URL: z.string().optional(),
 
     // Redis / Cache
@@ -39,11 +43,11 @@ const envSchema = z.object({
     STORAGE_S3_ENDPOINT: z.string().optional(),
 
     // CORS
-    CORS_ORIGIN: z.string().default('http://localhost:5173'),
+    CORS_ORIGIN: z.string().default('*'),
 
     // App Limits
     MAX_REQUEST_SIZE: z.string().default('10mb'),
-    COOKIE_SECURE: z.string().transform(val => val === 'true').default('false'),
+    COOKIE_SECURE: z.string().transform(val => val === 'true').default('true'),
     COOKIE_DOMAIN: z.string().default('localhost'),
 
     // Feature Flags
@@ -63,8 +67,45 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export function validateEnv(): Env {
+    const appPath = process.env.APP_PATH || './data';
+    const secretsPath = path.join(appPath, 'secrets.env');
+    const accessSecretPath = path.join(appPath, '.access_secret');
+    const refreshSecretPath = path.join(appPath, '.refresh_secret');
+
+    // Ensure directory exists
+    if (!fs.existsSync(appPath)) {
+        fs.mkdirSync(appPath, { recursive: true });
+    }
+
+    // Load secrets.env if exists
+    const secretsExist = fs.existsSync(secretsPath);
+    if (secretsExist) {
+        dotenv.config({ path: secretsPath, override: true });
+    }
+
+    // Handle JWT secrets
+    if (!fs.existsSync(accessSecretPath)) {
+        const secret = crypto.randomBytes(32).toString('hex');
+        fs.writeFileSync(accessSecretPath, secret);
+    }
+    process.env.JWT_ACCESS_SECRET = fs.readFileSync(accessSecretPath, 'utf-8').trim();
+
+    if (!fs.existsSync(refreshSecretPath)) {
+        const secret = crypto.randomBytes(32).toString('hex');
+        fs.writeFileSync(refreshSecretPath, secret);
+    }
+    process.env.JWT_REFRESH_SECRET = fs.readFileSync(refreshSecretPath, 'utf-8').trim();
+
     try {
-        return envSchema.parse(process.env);
+        const env = envSchema.parse(process.env);
+
+        // If secrets.env didn't exist, create it with sanitized defaults/values
+        if (!secretsExist) {
+            const lines = Object.entries(env).map(([key, value]) => `${key}=${value}`);
+            fs.writeFileSync(secretsPath, lines.join('\n'));
+        }
+
+        return env;
     } catch (error) {
         if (error instanceof z.ZodError) {
             const missingVars = error.errors.map(err => `${err.path.join('.')}: ${err.message}`);
@@ -73,5 +114,3 @@ export function validateEnv(): Env {
         throw error;
     }
 }
-
-
