@@ -12,8 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:nukedatabase": "bun scripts/nuke-database.ts",
-    "db:generateadmin": "bun scripts/generate-admin.ts",
+    "scripts:nukedatabase": "bun scripts/nuke-database.ts",
+    "scripts:generateadmin": "bun scripts/generate-admin.ts",
     "test": "bun test",
     "lint": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit"

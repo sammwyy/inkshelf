@@ -7,7 +7,7 @@ export const updateSettingSchema = z.object({
     if (data.key === 'app_signup_mode') {
         return ['allow', 'none', 'invitation'].includes(data.value);
     }
-    if (data.key === 'app_allow_anonymous_view') {
+    if (['app_allow_anonymous_view', 'feature_comments_enabled', 'feature_ratings_enabled', 'feature_public_lists_enabled'].includes(data.key)) {
         return typeof data.value === 'boolean';
     }
     if (['app_title', 'app_custom_css', 'app_custom_js'].includes(data.key)) {

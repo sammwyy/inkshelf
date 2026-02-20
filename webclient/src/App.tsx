@@ -4,8 +4,11 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './hooks/useAuth';
 import { useSettingsStore } from './stores/settingsStore';
-import Navbar from './components/layout/Navbar';
-import MobileNavigation from './components/layout/MobileNavigation';
+import Navbar from './components/navigation/Navbar';
+import MobileNavigation from './components/navigation/MobileNavigation';
+import AppLayout from './layouts/AppLayout';
+import AdminLayout from './layouts/AdminLayout';
+import AuthLayout from './layouts/AuthLayout';
 import HomeView from './views/HomeView';
 import SearchView from './views/SearchView';
 import SeriesDetailView from './views/SeriesDetailView';
@@ -41,7 +44,11 @@ const App: React.FC = () => {
   }
 
   if (!isConfigured) {
-    return <SetupView />;
+    return (
+      <AuthLayout>
+        <SetupView />
+      </AuthLayout>
+    );
   }
 
   const allowAnon = appSettings?.app_allow_anonymous_view ?? false;
@@ -65,18 +72,24 @@ const App: React.FC = () => {
     return <Navigate to={`/@${profile.username}`} replace />;
   };
 
+  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
+  const isAdminPage = location.pathname.startsWith('/admin');
+
+  const getLayout = () => {
+    if (isAuthPage) return AuthLayout;
+    if (isAdminPage) return AdminLayout;
+    return AppLayout;
+  };
+
+  const Layout = getLayout();
+
   return (
     <div className={`min-h-screen flex flex-col transition-colors duration-500 selection:bg-pink-500/30 overflow-x-hidden ${theme === 'dark'
       ? 'bg-[#050505] text-gray-200 dark'
       : 'bg-[#fdfcfd] text-zinc-900'
       }`}>
-      <Navbar />
-      <MobileNavigation />
-      <VerificationModal />
-      <main className={`${location.pathname.startsWith('/read/')
-        ? 'w-full'
-        : 'container mx-auto px-4 pt-20 md:pt-24 pb-24 md:pb-12'
-        } relative z-10 flex-1`}>
+      <Layout>
+        <VerificationModal />
         <Routes>
           <Route path="/" element={<PublicRoute><HomeView /></PublicRoute>} />
           <Route path="/search" element={<PublicRoute><SearchView /></PublicRoute>} />
@@ -99,7 +112,7 @@ const App: React.FC = () => {
 
           <Route path="*" element={<NotFoundView />} />
         </Routes>
-      </main>
+      </Layout>
     </div>
   );
 };

@@ -17,6 +17,9 @@ const PlatformSettings: React.FC = () => {
     const [allowAnonymous, setAllowAnonymous] = useState(true);
     const [customCss, setCustomCss] = useState('');
     const [customJs, setCustomJs] = useState('');
+    const [featureComments, setFeatureComments] = useState(true);
+    const [featureRatings, setFeatureRatings] = useState(true);
+    const [featureLists, setFeatureLists] = useState(true);
 
     useEffect(() => {
         fetchSettings();
@@ -33,6 +36,9 @@ const PlatformSettings: React.FC = () => {
             if (data.app_allow_anonymous_view !== undefined) setAllowAnonymous(data.app_allow_anonymous_view);
             if (data.app_custom_css) setCustomCss(data.app_custom_css);
             if (data.app_custom_js) setCustomJs(data.app_custom_js);
+            if (data.feature_comments_enabled !== undefined) setFeatureComments(data.feature_comments_enabled);
+            if (data.feature_ratings_enabled !== undefined) setFeatureRatings(data.feature_ratings_enabled);
+            if (data.feature_public_lists_enabled !== undefined) setFeatureLists(data.feature_public_lists_enabled);
         } catch (error) {
             console.error('Failed to fetch settings:', error);
             setMessage({ type: 'error', text: 'Failed to load settings' });
@@ -51,6 +57,9 @@ const PlatformSettings: React.FC = () => {
                 { key: 'app_allow_anonymous_view', value: allowAnonymous },
                 { key: 'app_custom_css', value: customCss },
                 { key: 'app_custom_js', value: customJs },
+                { key: 'feature_comments_enabled', value: featureComments },
+                { key: 'feature_ratings_enabled', value: featureRatings },
+                { key: 'feature_public_lists_enabled', value: featureLists },
             ];
 
             for (const update of updates) {
@@ -107,6 +116,34 @@ const PlatformSettings: React.FC = () => {
                 </div>
             </div>
 
+            {/* Feature Flags */}
+            <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8">
+                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
+                    <Check className="text-blue-500" size={24} /> Feature Management
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                        { id: 'comments', label: 'Comments', desc: 'Enable user comments on chapters.', value: featureComments, setter: setFeatureComments },
+                        { id: 'ratings', label: 'Ratings', desc: 'Allow users to rate series.', value: featureRatings, setter: setFeatureRatings },
+                        { id: 'lists', label: 'Public Lists', desc: 'Enable public user lists.', value: featureLists, setter: setFeatureLists },
+                    ].map((feature) => (
+                        <div key={feature.id} className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 flex flex-col justify-between gap-4">
+                            <div>
+                                <p className="text-zinc-900 dark:text-white font-bold text-sm">{feature.label}</p>
+                                <p className="text-zinc-500 text-xs mt-1">{feature.desc}</p>
+                            </div>
+                            <button
+                                onClick={() => feature.setter(!feature.value)}
+                                className={`w-full py-2 rounded-lg text-xs font-bold transition-colors duration-150 ${feature.value ? 'bg-blue-500 text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500'}`}
+                            >
+                                {feature.value ? 'ENABLED' : 'DISABLED'}
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             {/* Access & Privacy */}
             <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8">
                 <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-6 flex items-center gap-2">
@@ -122,8 +159,8 @@ const PlatformSettings: React.FC = () => {
                                     key={mode}
                                     onClick={() => setSignupMode(mode)}
                                     className={`px-4 py-3 rounded-lg border text-sm font-bold transition-colors duration-150 ${signupMode === mode
-                                            ? 'bg-violet-500 text-white border-violet-500'
-                                            : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700'
+                                        ? 'bg-violet-500 text-white border-violet-500'
+                                        : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:border-zinc-300 dark:hover:border-zinc-700'
                                         }`}
                                 >
                                     {mode.replace('_', ' ').toUpperCase()}

@@ -10,11 +10,13 @@ import { Star, Eye, RefreshCw, Compass, Shield, Play, Clock } from 'lucide-react
 import { Role } from '../lib/types/api';
 import { apiClient } from '../lib/clients/apiClient';
 
+// import HeroSection from '../components/navigation/HeroSection';
+
 const HomeView: React.FC = () => {
   const { series, fetchSeriesList, isLoading } = useLibrary();
   const { continueReading, fetchContinueReading, isLoading: isProgressLoading } = useProgress();
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, appSettings } = useAuth();
   const theme = useSettingsStore(state => state.theme);
   const isDark = theme === 'dark';
   const isAdmin = user?.role === Role.ADMIN;
@@ -28,36 +30,7 @@ const HomeView: React.FC = () => {
 
   return (
     <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
-      {/* Hero Header - Hidden on Mobile */}
-      <header className={`relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] border p-6 md:p-12 transition-colors duration-500 hidden md:block ${isDark
-        ? 'bg-gradient-to-br from-zinc-900/60 to-black border-zinc-800/50'
-        : 'bg-gradient-to-br from-pink-50 to-white border-pink-100'
-        }`}>
-        <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 pointer-events-none select-none">
-          <div className="text-[12rem] font-display text-pink-500">桜</div>
-        </div>
-        <div className="relative z-10 max-w-3xl">
-          <div className="flex items-center gap-2 text-pink-500 mb-4">
-            <Compass size={24} />
-            <span className="text-xs font-black uppercase tracking-[0.3em]">{t('nav.explore')}</span>
-          </div>
-          <h1 className={`font-display text-5xl md:text-7xl font-bold mb-6 leading-[1.1] ${isDark ? 'text-white' : 'text-zinc-900'}`}>
-            {t('home.heroTitle').split(' ')[0]} <span className="text-pink-500">{t('home.heroTitle').split(' ').slice(1).join(' ')}</span>
-          </h1>
-          <p className={`text-lg md:text-xl leading-relaxed max-w-xl ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
-            {t('home.heroSubtitle')}
-          </p>
-
-          {isAdmin && (
-            <Link to="/admin" className="inline-flex mt-8">
-              <button className="flex items-center gap-3 bg-pink-500 hover:bg-pink-600 text-white px-8 py-4 rounded-[1.5rem] font-bold transition-all active:scale-95 group">
-                <Shield size={20} className="group-hover:rotate-12 transition-transform" />
-                Admin Dashboard
-              </button>
-            </Link>
-          )}
-        </div>
-      </header>
+      {/* <HeroSection /> */}
 
       {/* Continue Reading Section */}
       {isAuthenticated && continueReading.length > 0 && (
@@ -163,28 +136,44 @@ const HomeView: React.FC = () => {
                 to={`/series/${item.slug}`}
                 className="group block"
               >
-                <div className={`relative aspect-[3/4] rounded-[1.5rem] overflow-hidden mb-3 transition-all duration-500 group-hover:-translate-y-2 group-hover:block transition-all duration-500 group-hover:ring-2 group-hover:ring-pink-500/30 ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'
+                <div className={`relative aspect-[3/4] rounded-[2rem] overflow-hidden mb-4 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_50px_rgba(255,45,85,0.15)] ${isDark ? 'bg-zinc-900' : 'bg-zinc-100'
                   }`}>
                   <img
                     src={apiClient.resolve(item.coverImage) || `https://picsum.photos/seed/${item.id}/300/400`}
                     alt={item.title}
-                    className="w-full h-full object-cover transition-scale duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400?text=No+Cover'; }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-white uppercase tracking-widest">
-                      <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                        <Star size={10} className="text-yellow-400 fill-yellow-400" /> {item.rating}
-                      </span>
-                      <span className="flex items-center gap-1 bg-black/40 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                        <Eye size={10} /> {item.viewCount}
+
+                  {/* Glass overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity" />
+
+                  <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-1 group-hover:translate-y-0 transition-transform">
+                    <div className="flex items-center gap-2">
+                      {appSettings?.feature_ratings_enabled !== false && (
+                        <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-black text-white">
+                          <Star size={12} className="text-yellow-400 fill-yellow-400" /> {item.rating}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1.5 rounded-xl border border-white/10 text-[10px] font-black text-white">
+                        <Eye size={12} /> {item.viewCount}
                       </span>
                     </div>
                   </div>
                 </div>
-                <h3 className={`font-bold text-sm line-clamp-2 transition-colors leading-tight mb-1 group-hover:text-pink-500 ${isDark ? 'text-gray-100' : 'text-zinc-800'}`}>{item.title}</h3>
-                <p className="text-[10px] text-zinc-500 uppercase font-black tracking-[0.2em]">{item.status}</p>
+
+                <h3 className={`font-display font-bold text-sm line-clamp-2 transition-colors leading-tight mb-2 group-hover:text-pink-500 ${isDark ? 'text-gray-100' : 'text-zinc-800'}`}>
+                  {item.title}
+                </h3>
+
+                <div className="flex items-center gap-2">
+                  <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-md ${item.status === 'ONGOING'
+                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                      : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                    }`}>
+                    {item.status}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>

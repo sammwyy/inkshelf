@@ -1,6 +1,14 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import argon2 from 'argon2';
 import crypto from 'crypto';
+import { validateEnv } from '../src/config/env';
+
+enum Role {
+    ADMIN = 'ADMIN',
+    USER = 'USER'
+}
+
+validateEnv();
 
 const prisma = new PrismaClient();
 

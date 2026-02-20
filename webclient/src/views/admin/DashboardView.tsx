@@ -43,36 +43,34 @@ const DashboardView: React.FC = () => {
     };
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex gap-6">
-            {/* Sidebar Desktop */}
-            <aside className="hidden lg:flex flex-col w-64 shrink-0">
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 h-full sticky top-24">
-                    <div className="px-4 py-2 mb-6">
-                        <h2 className="text-zinc-500 font-bold text-xs uppercase tracking-wider mb-1">Admin Panel</h2>
-                    </div>
-
+        <div className="flex flex-col lg:flex-row gap-8">
+            {/* Sidebar */}
+            <aside className="w-full lg:w-64 shrink-0">
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-4 sticky top-24">
                     <nav className="space-y-1">
                         {!isChapterMode ? navItems.map((item) => (
                             <button
                                 key={item.id}
-                                onClick={() => setActiveTab(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-150 font-medium text-sm ${activeTab === item.id
-                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-                                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                                onClick={() => {
+                                    setActiveTab(item.id);
+                                    setIsMobileMenuOpen(false);
+                                }}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-bold text-sm ${activeTab === item.id
+                                    ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                    : 'text-zinc-500 dark:text-zinc-400 hover:text-pink-500 hover:bg-pink-500/5'
                                     }`}
                             >
-                                <item.icon size={18} className={activeTab === item.id ? 'text-pink-500' : ''} />
+                                <item.icon size={18} />
                                 {item.label}
                             </button>
                         )) : (
-                            <div className="px-4 py-2">
-                                <p className="text-zinc-500 text-sm mb-2">Currently Editing</p>
-                                <p className="text-zinc-900 dark:text-white font-bold">Chapter Management</p>
+                            <div className="px-4 py-4 text-center">
+                                <p className="text-zinc-500 text-xs uppercase tracking-widest font-black mb-4">Editing Chapter</p>
                                 <button
                                     onClick={() => window.history.back()}
-                                    className="mt-4 text-xs text-pink-500 hover:underline"
+                                    className="w-full py-3 bg-zinc-100 dark:bg-zinc-800 hover:bg-pink-500/10 text-zinc-900 dark:text-white hover:text-pink-500 rounded-2xl transition-all font-bold text-sm border border-transparent hover:border-pink-500/20"
                                 >
-                                    &larr; Back to Series
+                                    &larr; Return
                                 </button>
                             </div>
                         )}
@@ -82,37 +80,9 @@ const DashboardView: React.FC = () => {
 
             {/* Content */}
             <main className="flex-1 min-w-0">
-                {/* Mobile Header */}
-                <div className="lg:hidden flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-2">
-                        <Shield className="text-pink-500" size={24} />
-                        <span className="font-bold text-zinc-900 dark:text-white text-lg">Admin</span>
-                    </div>
-                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-zinc-500 dark:text-zinc-400">
-                        {isMobileMenuOpen ? <X /> : <Menu />}
-                    </button>
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] p-6 md:p-8">
+                    {renderContent()}
                 </div>
-
-                {/* Mobile Menu */}
-                {isMobileMenuOpen && (
-                    <div className="lg:hidden mb-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-2 space-y-1">
-                        {navItems.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-150 font-medium ${activeTab === item.id
-                                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white'
-                                    : 'text-zinc-500 dark:text-zinc-400'
-                                    }`}
-                            >
-                                <item.icon size={18} />
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                {renderContent()}
             </main>
         </div>
     );

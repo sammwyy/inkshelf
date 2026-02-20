@@ -51,53 +51,56 @@ const VerificationModal: React.FC = () => {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 sm:p-4">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-all duration-700" />
 
             {/* Modal */}
-            <div className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="relative w-full max-w-md glass rounded-[3rem] p-10 md:p-14 shadow-[0_50px_100px_rgba(0,0,0,0.5)] animate-in zoom-in-95 duration-500 overflow-hidden border border-white/5 group">
+                {/* Inner glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
                 <button
                     onClick={logout}
-                    className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors p-2"
+                    className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-all p-3 hover:bg-white/5 rounded-2xl group"
                 >
-                    <LogOut size={20} />
+                    <LogOut size={20} className="group-hover:translate-x-1 transition-transform" />
                 </button>
 
-                <div className="text-center space-y-6">
-                    <div className="w-16 h-16 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto text-pink-500">
-                        <Mail size={32} />
+                <div className="relative z-10 text-center space-y-10">
+                    <div className="w-20 h-20 rounded-[2rem] bg-pink-500 text-white flex items-center justify-center mx-auto shadow-2xl shadow-pink-500/20 rotate-3 transition-transform hover:rotate-0 duration-500">
+                        <Mail size={36} />
                     </div>
 
-                    <div>
-                        <h2 className="text-2xl font-bold text-white font-display">Verify your email</h2>
-                        <p className="text-zinc-400 text-sm mt-2">
-                            We've sent a verification code to <br />
-                            <span className="text-white font-medium">{user.email}</span>
+                    <div className="space-y-3">
+                        <h2 className="text-3xl font-black text-white font-display uppercase tracking-tighter">Verify your email</h2>
+                        <p className="text-zinc-500 font-medium">
+                            We've sent a 6-digit code to <br />
+                            <span className="text-white font-bold">{user.email}</span>
                         </p>
                     </div>
 
-                    <form onSubmit={handleConfirm} className="space-y-4">
+                    <form onSubmit={handleConfirm} className="space-y-8">
                         <Input
                             label="Verification Code"
-                            placeholder="Enter 6-digit code"
+                            placeholder="0 0 0 0 0 0"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
                             required
-                            className="text-center text-2xl tracking-[0.5em] font-mono"
+                            className="text-center text-3xl tracking-[0.6em] font-display font-black py-5 h-20"
                             maxLength={6}
                         />
 
                         {error && (
-                            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
-                                <AlertCircle size={16} />
+                            <div className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-rose-500 text-[10px] font-black uppercase tracking-widest animate-in shake duration-300">
+                                <AlertCircle size={14} />
                                 {error}
                             </div>
                         )}
 
                         {success && (
-                            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
-                                <CheckCircle size={16} />
+                            <div className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest animate-in fade-in duration-300">
+                                <CheckCircle size={14} />
                                 {success}
                             </div>
                         )}
@@ -105,32 +108,34 @@ const VerificationModal: React.FC = () => {
                         <Button
                             fullWidth
                             type="submit"
-                            disabled={!code}
+                            size="lg"
+                            className="h-16 rounded-[2rem] shadow-2xl shadow-pink-500/20"
+                            disabled={!code || isSubmitting}
                             loading={isSubmitting}
                         >
-                            Verify Email
+                            Confirm Identity
                         </Button>
                     </form>
 
-                    <div className="pt-2">
-                        <p className="text-xs text-zinc-500">
-                            Didn't receive the code?{' '}
+                    <div className="pt-4 space-y-6">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                            Didn't receive it?{' '}
                             <button
                                 onClick={handleResend}
                                 disabled={isResending}
-                                className="text-pink-500 hover:text-pink-400 font-bold disabled:opacity-50"
+                                className="text-pink-500 hover:text-pink-400 font-black transition-colors disabled:opacity-50 underline decoration-2 underline-offset-4"
                             >
-                                {isResending ? 'Sending...' : 'Resend Code'}
+                                {isResending ? 'Resending...' : 'Resend Code'}
                             </button>
                         </p>
-                    </div>
 
-                    <button
-                        onClick={logout}
-                        className="text-xs text-zinc-600 hover:text-zinc-400 font-medium underline px-4 py-2"
-                    >
-                        Use a different account
-                    </button>
+                        <button
+                            onClick={logout}
+                            className="text-[10px] text-zinc-600 hover:text-white font-black uppercase tracking-[0.3em] transition-colors py-2"
+                        >
+                            Use a different account
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

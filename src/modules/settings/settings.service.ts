@@ -8,6 +8,9 @@ export interface SystemSettings {
     app_title: string;
     app_custom_css: string;
     app_custom_js: string;
+    feature_comments_enabled: boolean;
+    feature_ratings_enabled: boolean;
+    feature_public_lists_enabled: boolean;
 }
 
 const DEFAULT_SETTINGS: SystemSettings = {
@@ -16,6 +19,9 @@ const DEFAULT_SETTINGS: SystemSettings = {
     app_title: process.env.APP_TITLE || 'Inkshelf | Instance',
     app_custom_css: '',
     app_custom_js: '',
+    feature_comments_enabled: true,
+    feature_ratings_enabled: true,
+    feature_public_lists_enabled: true,
 };
 
 const DEFAULT_PRIVATE_SETTINGS: PrivateSystemSettings = {
@@ -24,6 +30,13 @@ const DEFAULT_PRIVATE_SETTINGS: PrivateSystemSettings = {
 
 export interface PrivateSystemSettings {
     // Define private settings types here
+}
+
+function parseValue(key: string, value: string): any {
+    if (['app_allow_anonymous_view', 'feature_comments_enabled', 'feature_ratings_enabled', 'feature_public_lists_enabled'].includes(key)) {
+        return value === 'true' || value === '1';
+    }
+    return value;
 }
 
 export class SettingsService {
@@ -35,16 +48,13 @@ export class SettingsService {
             where: { isPrivate: false }
         });
         const settingsMap = dbSettings.reduce((acc: Record<string, any>, curr: any) => {
-            acc[curr.key] = curr.value;
+            acc[curr.key] = parseValue(curr.key, curr.value);
             return acc;
         }, {} as Record<string, any>);
 
         return {
-            app_signup_mode: settingsMap['app_signup_mode'] ?? DEFAULT_SETTINGS.app_signup_mode,
-            app_allow_anonymous_view: settingsMap['app_allow_anonymous_view'] ?? DEFAULT_SETTINGS.app_allow_anonymous_view,
-            app_title: settingsMap['app_title'] ?? DEFAULT_SETTINGS.app_title,
-            app_custom_css: settingsMap['app_custom_css'] ?? DEFAULT_SETTINGS.app_custom_css,
-            app_custom_js: settingsMap['app_custom_js'] ?? DEFAULT_SETTINGS.app_custom_js,
+            ...DEFAULT_SETTINGS,
+            ...settingsMap
         };
     }
 
@@ -54,7 +64,7 @@ export class SettingsService {
     static async getPrivateSettings(): Promise<SystemSettings & PrivateSystemSettings> {
         const dbSettings = await prisma.systemSetting.findMany(); // All settings (public + private)
         const settingsMap = dbSettings.reduce((acc: Record<string, any>, curr: any) => {
-            acc[curr.key] = curr.value;
+            acc[curr.key] = parseValue(curr.key, curr.value);
             return acc;
         }, {} as Record<string, any>);
 
@@ -74,7 +84,7 @@ export class SettingsService {
         });
 
         if (setting) {
-            return setting.value as SystemSettings[K];
+            return parseValue(key, setting.value) as SystemSettings[K];
         }
 
         return DEFAULT_SETTINGS[key];
@@ -84,10 +94,11 @@ export class SettingsService {
      * Update or create a setting
      */
     static async updateSetting(key: string, value: any, isPrivate: boolean = false): Promise<void> {
+        const stringValue = typeof value === 'string' ? value : String(value);
         await prisma.systemSetting.upsert({
             where: { key },
-            update: { value, isPrivate, updatedAt: new Date() },
-            create: { key, value, isPrivate },
+            update: { value: stringValue, isPrivate, updatedAt: new Date() },
+            create: { key, value: stringValue, isPrivate },
         });
     }
 }

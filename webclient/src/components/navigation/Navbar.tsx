@@ -54,13 +54,17 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 flex items-center justify-between gap-6">
 
         {/* Brand/Logo */}
-        <Link to="/" className="flex items-center gap-3 group shrink-0 relative z-20">
+        <Link to="/" className="flex items-center gap-4 group shrink-0 relative z-20">
           <div className="relative">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white rotate-3 transition-all group-hover:rotate-0 group-hover:scale-110">
-              <span className="font-bold text-xl">I</span>
+            <div className="relative w-11 h-11 bg-pink-500 rounded-2xl flex items-center justify-center text-white rotate-2 transition-all duration-500 group-hover:rotate-0 group-hover:scale-110 shadow-lg shadow-pink-500/20">
+              <span className="font-display font-black text-2xl">I</span>
             </div>
+            {/* Ambient glow behind logo */}
+            <div className="absolute inset-0 bg-pink-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
           </div>
-          <span className={`font-display text-2xl font-bold tracking-tight hidden lg:block ${isDark ? 'text-white' : 'text-zinc-900'}`}>Inkshelf</span>
+          <span className={`font-display text-2xl font-black tracking-tighter hidden lg:block uppercase ${isDark ? 'text-white' : 'text-zinc-900'}`}>
+            INK<span className="text-pink-500">SHELF</span>
+          </span>
         </Link>
 
         {/* Navigation Tabs - Centered - Only visible if authenticated */}
@@ -70,15 +74,15 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`group relative flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-[0.2em] transition-all ${location.pathname === item.to
+                className={`group relative flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-display font-black uppercase tracking-[0.25em] transition-all ${location.pathname === item.to
                   ? 'text-pink-500'
-                  : (isDark ? 'text-zinc-500 hover:text-zinc-300' : 'text-zinc-400 hover:text-zinc-700')
+                  : (isDark ? 'text-zinc-500 hover:text-white' : 'text-zinc-400 hover:text-zinc-900')
                   }`}
               >
-                <item.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${location.pathname === item.to ? 'animate-pulse' : ''}`} />
+                <item.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${location.pathname === item.to ? 'text-pink-500' : ''}`} />
                 <span>{item.label}</span>
                 {location.pathname === item.to && (
-                  <div className="absolute inset-0 bg-pink-500/5 rounded-full -z-10" />
+                  <div className="absolute inset-0 bg-pink-500/5 rounded-2xl -z-10" />
                 )}
               </Link>
             ))}

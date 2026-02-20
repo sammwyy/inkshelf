@@ -1,43 +1,75 @@
 @import "tailwindcss";
 
-/* Fonts */
-@import "@fontsource-variable/inter";
-@import "@fontsource-variable/playfair-display";
+/* Fonts - Google Fonts are more reliable for consistent look */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@100..900&display=swap');
 
 @theme {
-    --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --font-display: "Playfair Display Variable", serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Outfit", sans-serif;
+    
+    --color-pink-500: oklch(0.65 0.25 0);
+    --color-pink-600: oklch(0.55 0.25 0);
 }
 
 :root {
     --background: #050505;
-    --foreground: #e5e7eb;
+    --foreground: #f4f4f5;
+    --card: #09090b;
+    --card-border: rgba(255, 255, 255, 0.08);
+}
+
+.light {
+    --background: #fdfcfd;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-border: rgba(0, 0, 0, 0.05);
 }
 
 body {
     font-family: var(--font-sans);
     background-color: var(--background);
     color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .font-display {
     font-family: var(--font-display);
 }
 
-/* Custom scrollbar for manga feel */
+/* Glassmorphism Utility */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.light .glass {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
 }
 
 ::-webkit-scrollbar-track {
-    background: #0a0a0a;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #ff8da1;
+    background: oklch(0.65 0.25 0 / 0.3);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #ff2d55;
+    background: oklch(0.65 0.25 0 / 0.6);
+}
+
+/* Transitions */
+* {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-duration: 200ms;
 }

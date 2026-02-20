@@ -9,7 +9,7 @@ import { apiClient } from '../lib/clients/apiClient';
 
 const ProfileView: React.FC = () => {
     const { username } = useParams<{ username: string }>();
-    const { profile: ownProfile } = useAuth();
+    const { profile: ownProfile, appSettings } = useAuth();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -135,14 +135,13 @@ const ProfileView: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Statistics / Quick info */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                     {[
-                        { label: 'Favorites', value: profile.favorites?.length || 0, icon: Heart, color: 'text-pink-500' },
-                        { label: 'Comments', value: profile.comments?.length || 0, icon: MessageSquare, color: 'text-blue-500' },
-                        { label: 'Ratings', value: profile.ratings?.length || 0, icon: Star, color: 'text-yellow-500' },
-                        { label: 'Read Online', value: profile.readingProgress?.length || 0, icon: BookOpen, color: 'text-emerald-500' },
-                    ].map((stat, i) => (
+                        { id: 'favorites', label: 'Favorites', value: profile.favorites?.length || 0, icon: Heart, color: 'text-pink-500', enabled: true },
+                        { id: 'comments', label: 'Comments', value: profile.comments?.length || 0, icon: MessageSquare, color: 'text-blue-500', enabled: appSettings?.feature_comments_enabled ?? true },
+                        { id: 'ratings', label: 'Ratings', value: profile.ratings?.length || 0, icon: Star, color: 'text-yellow-500', enabled: appSettings?.feature_ratings_enabled ?? true },
+                        { id: 'lists', label: 'Lists', value: profile.lists?.length || 0, icon: BookOpen, color: 'text-emerald-500', enabled: appSettings?.feature_public_lists_enabled ?? true },
+                    ].filter(s => s.enabled).map((stat, i) => (
                         <div key={i} className="bg-zinc-900/50 border border-zinc-800/50 p-4 rounded-3xl backdrop-blur-sm">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-xl bg-white/5 ${stat.color}`}>

@@ -64,12 +64,6 @@ export const config = {
         cookieSecure: env.COOKIE_SECURE,
         cookieDomain: env.COOKIE_DOMAIN,
     },
-
-    features: {
-        commentsEnabled: env.FEATURE_COMMENTS_ENABLED,
-        ratingsEnabled: env.FEATURE_RATINGS_ENABLED,
-        publicListsEnabled: env.FEATURE_PUBLIC_LISTS_ENABLED,
-    },
 } as const;
 
 

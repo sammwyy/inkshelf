@@ -204,7 +204,7 @@ export interface CreateRatingDto {
 }
 
 export interface UpdateSettingDto {
-  key: 'app_signup_mode' | 'app_allow_anonymous_view' | 'app_title' | 'app_custom_css' | 'app_custom_js';
+  key: 'app_signup_mode' | 'app_allow_anonymous_view' | 'app_title' | 'app_custom_css' | 'app_custom_js' | 'feature_comments_enabled' | 'feature_ratings_enabled' | 'feature_public_lists_enabled';
   value: any;
 }
 

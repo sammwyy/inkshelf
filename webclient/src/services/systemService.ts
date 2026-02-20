@@ -10,6 +10,9 @@ export interface AppSettings {
     app_title: string;
     app_custom_js: string;
     app_custom_css: string;
+    feature_comments_enabled: boolean;
+    feature_ratings_enabled: boolean;
+    feature_public_lists_enabled: boolean;
 }
 
 export const systemService = {

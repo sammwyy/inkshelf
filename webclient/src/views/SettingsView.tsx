@@ -400,67 +400,63 @@ const SettingsView: React.FC = () => {
     );
 
     return (
-        <Layout>
-            <div className="container mx-auto px-0 md:px-4 py-6 md:py-24 max-w-5xl">
-                <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-8">
 
-                    {/* Desktop Sidebar */}
-                    <aside className="hidden md:block w-64 shrink-0">
-                        <h1 className="text-3xl font-display font-bold mb-8 flex items-center gap-3 text-white">
-                            <SettingsIcon className="text-pink-500" size={32} />
-                            {t('settings.title')}
-                        </h1>
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:block w-64 shrink-0">
+                <h1 className="text-3xl font-display font-bold mb-8 flex items-center gap-3 text-white">
+                    <SettingsIcon className="text-pink-500" size={32} />
+                    {t('settings.title')}
+                </h1>
 
-                        <nav className="space-y-2">
-                            {sections.map(section => (
-                                <button
-                                    key={section.id}
-                                    onClick={() => setActiveSection(section.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-sm font-semibold ${activeSection === section.id
-                                        ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
-                                        : 'hover:bg-pink-500/5 text-zinc-400 hover:text-pink-500'
-                                        }`}
-                                >
-                                    <section.icon size={20} />
-                                    {section.label}
-                                </button>
-                            ))}
-                        </nav>
-                    </aside>
+                <nav className="space-y-2">
+                    {sections.map(section => (
+                        <button
+                            key={section.id}
+                            onClick={() => setActiveSection(section.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-sm font-semibold ${activeSection === section.id
+                                ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/20'
+                                : 'hover:bg-pink-500/5 text-zinc-400 hover:text-pink-500'
+                                }`}
+                        >
+                            <section.icon size={20} />
+                            {section.label}
+                        </button>
+                    ))}
+                </nav>
+            </aside>
 
-                    {/* Main Content */}
-                    <main className="flex-1 bg-[#0a0a0a]/50 md:bg-[#0a0a0a] md:border md:border-zinc-800/50 rounded-none md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl relative overflow-hidden min-h-0 max-md:pb-32">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-pink-500/5 blur-[100px] rounded-full pointer-events-none" />
+            {/* Main Content */}
+            <main className="flex-1 bg-[#0a0a0a]/50 md:bg-[#0a0a0a] md:border md:border-zinc-800/50 rounded-none md:rounded-[2.5rem] p-6 md:p-12 shadow-2xl relative overflow-hidden min-h-0 max-md:pb-32">
+                {/* Decorative background element */}
+                <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-pink-500/5 blur-[100px] rounded-full pointer-events-none" />
 
-                        <div className="md:hidden mb-8">
-                            <h1 className="text-2xl font-display font-bold text-white flex items-center gap-3">
-                                <SettingsIcon className="text-pink-500" size={24} />
-                                {t('settings.title')}
-                            </h1>
-                        </div>
-
-                        {/* Stacking on mobile, Tabs on desktop */}
-                        <div className="block md:hidden space-y-12 pb-20">
-                            {renderProfile()}
-                            <div className="h-px bg-zinc-800/50 w-full" />
-                            {renderPrivacy()}
-                            <div className="h-px bg-zinc-800/50 w-full" />
-                            {renderSecurity()}
-                            <div className="h-px bg-zinc-800/50 w-full" />
-                            {renderAppearance()}
-                        </div>
-
-                        <div className="hidden md:block">
-                            {activeSection === 'profile' && renderProfile()}
-                            {activeSection === 'privacy' && renderPrivacy()}
-                            {activeSection === 'security' && renderSecurity()}
-                            {activeSection === 'appearance' && renderAppearance()}
-                        </div>
-                    </main>
+                <div className="md:hidden mb-8">
+                    <h1 className="text-2xl font-display font-bold text-white flex items-center gap-3">
+                        <SettingsIcon className="text-pink-500" size={24} />
+                        {t('settings.title')}
+                    </h1>
                 </div>
-            </div>
-        </Layout>
+
+                {/* Stacking on mobile, Tabs on desktop */}
+                <div className="block md:hidden space-y-12 pb-20">
+                    {renderProfile()}
+                    <div className="h-px bg-zinc-800/50 w-full" />
+                    {renderPrivacy()}
+                    <div className="h-px bg-zinc-800/50 w-full" />
+                    {renderSecurity()}
+                    <div className="h-px bg-zinc-800/50 w-full" />
+                    {renderAppearance()}
+                </div>
+
+                <div className="hidden md:block">
+                    {activeSection === 'profile' && renderProfile()}
+                    {activeSection === 'privacy' && renderPrivacy()}
+                    {activeSection === 'security' && renderSecurity()}
+                    {activeSection === 'appearance' && renderAppearance()}
+                </div>
+            </main>
+        </div>
     );
 };
 

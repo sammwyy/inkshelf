@@ -18,13 +18,13 @@ const SetupView: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url) return;
-    
+
     setError(null);
     setSuccess(false);
     setIsVerifying(true);
-    
+
     const result = await apiClient.checkHealth(url);
-    
+
     if (result.ok) {
       setSuccess(true);
       const normalized = apiClient.normalizeUrl(url);
@@ -38,65 +38,59 @@ const SetupView: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <Cloud size={120} className="text-pink-500" />
-        </div>
-        
-        <div className="relative z-10 text-center space-y-6">
-          <div className="flex justify-end mb-2">
-            <button 
-              onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
-              className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-widest text-zinc-500 hover:text-pink-400 transition-colors"
-            >
-              <Languages size={14} />
-              {language === 'en' ? 'ES' : 'EN'}
-            </button>
-          </div>
-
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto transition-all duration-500 ${success ? 'bg-green-500/10 text-green-500' : 'bg-pink-500/10 text-pink-500'}`}>
-            {success ? <CheckCircle2 size={32} /> : <Cloud size={32} />}
-          </div>
-          
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-2 font-display">{t('setup.title')}</h1>
-            <p className="text-gray-400 text-sm">{t('setup.subtitle')}</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
-            <Input 
-              label={t('setup.inputLabel')}
-              placeholder={t('setup.inputPlaceholder')}
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              disabled={isVerifying || success}
-              required
-            />
-            
-            {error && (
-              <div className="flex items-start gap-2 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs leading-relaxed animate-in fade-in slide-in-from-top-1">
-                <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="font-semibold uppercase tracking-wider text-[10px]">{t('setup.errorTitle')}</p>
-                  <p>{error}</p>
-                </div>
-              </div>
-            )}
-
-            <Button 
-              fullWidth 
-              type="submit" 
-              size="lg" 
-              disabled={isVerifying || success}
-              className={success ? 'bg-green-600' : ''}
-            >
-              {isVerifying ? t('setup.buttonVerifying') : success ? t('setup.buttonConnected') : t('setup.buttonConnect')}
-            </Button>
-          </form>
-        </div>
+    <>
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-pink-500 transition-colors py-2 px-3 rounded-xl hover:bg-white/5"
+        >
+          <Languages size={14} />
+          {language === 'en' ? 'Castellano' : 'English'}
+        </button>
       </div>
-    </div>
+
+      <div className="text-center space-y-8">
+        <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto transition-all duration-700 shadow-2xl ${success ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-pink-500 text-white shadow-pink-500/20'}`}>
+          {success ? <CheckCircle2 size={36} /> : <Cloud size={36} />}
+        </div>
+
+        <div className="space-y-3">
+          <h1 className="text-3xl font-display font-black text-white uppercase tracking-tighter">
+            {t('setup.title')}
+          </h1>
+          <p className="text-zinc-500 font-medium">{t('setup.subtitle')}</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 text-left">
+          <Input
+            label={t('setup.inputLabel')}
+            placeholder="https://api.inkshelf.com"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            disabled={isVerifying || success}
+            required
+          />
+
+          {error && (
+            <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/10 text-xs font-bold text-rose-500 uppercase tracking-widest text-center flex items-center justify-center gap-2">
+              <AlertCircle size={14} />
+              {error}
+            </div>
+          )}
+
+          <Button
+            fullWidth
+            type="submit"
+            size="lg"
+            className="mt-2"
+            disabled={isVerifying || success}
+            loading={isVerifying}
+          >
+            {success ? t('setup.buttonConnected') : t('setup.buttonConnect')}
+          </Button>
+        </form>
+      </div>
+    </>
   );
 };
 

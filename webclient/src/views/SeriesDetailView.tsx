@@ -16,7 +16,7 @@ const SeriesDetailView: React.FC = () => {
   const { currentSeries, getSeriesBySlug, toggleFavorite, favorites, isLoading: isLibLoading } = useLibrary();
   const { getChapters, chaptersMap, isLoading: isReaderLoading } = useReader();
   const { allProgress, fetchAllProgress } = useProgress();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, appSettings } = useAuth();
   const { t } = useTranslation();
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -139,7 +139,9 @@ const SeriesDetailView: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-400">
             <span className="flex items-center gap-1.5"><UserIcon size={16} className="text-pink-500/50" /> {currentSeries.author}</span>
-            <span className="flex items-center gap-1.5"><Star size={16} className="text-yellow-400 fill-yellow-400" /> {currentSeries.rating}</span>
+            {appSettings?.feature_ratings_enabled !== false && (
+              <span className="flex items-center gap-1.5"><Star size={16} className="text-yellow-400 fill-yellow-400" /> {currentSeries.rating}</span>
+            )}
             <span className="flex items-center gap-1.5"><Calendar size={16} className="text-blue-500/50" /> {currentSeries.year}</span>
             <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${currentSeries.status === 'ONGOING' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
               {currentSeries.status}

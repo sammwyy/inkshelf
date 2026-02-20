@@ -49,11 +49,6 @@ const envSchema = z.object({
     MAX_REQUEST_SIZE: z.string().default('10mb'),
     COOKIE_SECURE: z.string().transform(val => val === 'true').default('true'),
     COOKIE_DOMAIN: z.string().default('localhost'),
-
-    // Feature Flags
-    FEATURE_COMMENTS_ENABLED: z.string().transform(val => val === 'true').default('true'),
-    FEATURE_RATINGS_ENABLED: z.string().transform(val => val === 'true').default('true'),
-    FEATURE_PUBLIC_LISTS_ENABLED: z.string().transform(val => val === 'true').default('true'),
 }).superRefine((data, ctx) => {
     if (data.DATABASE_TYPE === 'postgresql' && !data.DATABASE_URL) {
         ctx.addIssue({
@@ -98,6 +93,11 @@ export function validateEnv(): Env {
 
     try {
         const env = envSchema.parse(process.env);
+
+        // Auto-set DATABASE_URL for SQLite if not provided
+        if (env.DATABASE_TYPE === 'sqlite' && !process.env.DATABASE_URL) {
+            process.env.DATABASE_URL = `file:${path.resolve(env.APP_PATH, 'data.db')}`;
+        }
 
         // If secrets.env didn't exist, create it with sanitized defaults/values
         if (!secretsExist) {
