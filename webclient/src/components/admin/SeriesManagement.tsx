@@ -19,6 +19,7 @@ const SeriesManagement: React.FC = () => {
     // Series form state
     const [formData, setFormData] = useState({
         title: '',
+        alternativeTitles: '',
         description: '',
         author: '',
         artist: '',
@@ -47,6 +48,7 @@ const SeriesManagement: React.FC = () => {
     const handleOpenEdit = (item: Series) => {
         setFormData({
             title: item.title,
+            alternativeTitles: item.alternativeTitles?.join(', ') || '',
             description: item.description,
             author: item.author,
             artist: item.artist || '',
@@ -63,6 +65,7 @@ const SeriesManagement: React.FC = () => {
     const handleOpenCreate = () => {
         setFormData({
             title: '',
+            alternativeTitles: '',
             description: '',
             author: '',
             artist: '',
@@ -90,6 +93,10 @@ const SeriesManagement: React.FC = () => {
         // Tags
         const tags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
         tags.forEach(tag => data.append('tags', tag));
+
+        // Alternative Titles
+        const altTitles = formData.alternativeTitles.split(',').map(t => t.trim()).filter(Boolean);
+        altTitles.forEach(t => data.append('alternativeTitles', t));
 
         if (coverFile) {
             data.append('thumbnail', coverFile);
@@ -199,6 +206,7 @@ const SeriesManagement: React.FC = () => {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Input label="Title" required value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+                                <Input label="Alternative Titles (comma separated)" value={formData.alternativeTitles} onChange={e => setFormData({ ...formData, alternativeTitles: e.target.value })} />
                                 <Input label="Author" required value={formData.author} onChange={e => setFormData({ ...formData, author: e.target.value })} />
                                 <Input label="Artist" value={formData.artist} onChange={e => setFormData({ ...formData, artist: e.target.value })} />
                                 <Input label="Year" type="number" value={formData.year} onChange={e => setFormData({ ...formData, year: Number(e.target.value) })} />

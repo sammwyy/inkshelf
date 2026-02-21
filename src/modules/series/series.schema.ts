@@ -4,13 +4,19 @@ import { SeriesStatus } from '@/database/enums';
 
 export const createSeriesSchema = z.object({
     title: z.string().min(1, 'Title is required').max(255),
-    alternativeTitles: z.array(z.string()).optional().default([]),
+    alternativeTitles: z.preprocess((val) => {
+        if (!val) return [];
+        return Array.isArray(val) ? val : [val];
+    }, z.array(z.string())).optional().default([]),
     description: z.string().min(1, 'Description is required'),
     author: z.string().min(1, 'Author is required'),
     artist: z.string().optional(),
     status: z.nativeEnum(SeriesStatus).default(SeriesStatus.ONGOING),
-    tags: z.preprocess((val) => Array.isArray(val) ? val : [val], z.array(z.string())).optional().default([]),
-    year: z.coerce.number().int().min(1900).max(new Date().getFullYear() + 1).optional(),
+    tags: z.preprocess((val) => {
+        if (!val) return [];
+        return Array.isArray(val) ? val : [val];
+    }, z.array(z.string())).optional().default([]),
+    year: z.coerce.number().int().min(1900).max(2100).optional(),
     coverImage: z.string().url().optional(),
 });
 

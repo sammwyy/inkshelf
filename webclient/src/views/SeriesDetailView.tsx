@@ -135,10 +135,18 @@ const SeriesDetailView: React.FC = () => {
             <h1 className="font-display text-4xl md:text-5xl font-bold text-white leading-tight">
               {currentSeries.title}
             </h1>
+            {currentSeries.alternativeTitles && currentSeries.alternativeTitles.length > 0 && (
+              <p className="text-gray-500 text-sm font-medium italic">
+                {currentSeries.alternativeTitles.join(' • ')}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-400">
-            <span className="flex items-center gap-1.5"><UserIcon size={16} className="text-pink-500/50" /> {currentSeries.author}</span>
+            <span className="flex items-center gap-1.5" title="Author"><UserIcon size={16} className="text-pink-500/50" /> {currentSeries.author}</span>
+            {currentSeries.artist && (
+              <span className="flex items-center gap-1.5" title="Artist"><UserIcon size={16} className="text-blue-500/50" /> {currentSeries.artist}</span>
+            )}
             {appSettings?.feature_ratings_enabled !== false && (
               <span className="flex items-center gap-1.5"><Star size={16} className="text-yellow-400 fill-yellow-400" /> {currentSeries.rating}</span>
             )}

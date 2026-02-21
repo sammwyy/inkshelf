@@ -12,7 +12,7 @@ export class SeriesService {
 
         const series = await prisma.series.create({
             data: {
-                ...data,
+                ...this.prepareData(data),
                 slug,
             },
             include: {
@@ -28,7 +28,7 @@ export class SeriesService {
         // Invalidate cache
         await this.invalidateSeriesCache();
 
-        return series;
+        return this.formatSeries(series);
     }
 
     async getSeries(query: GetSeriesQueryDto) {
@@ -76,8 +76,10 @@ export class SeriesService {
             prisma.series.count({ where }),
         ]);
 
+        const formattedSeries = series.map(s => this.formatSeries(s));
+
         const result = {
-            data: series,
+            data: formattedSeries,
             pagination: {
                 page,
                 limit,
@@ -138,6 +140,8 @@ export class SeriesService {
             throw new NotFoundError('Series not found');
         }
 
+        const formatted = this.formatSeries(series);
+
         // Increment view count asynchronously
         prisma.series.update({
             where: { id },
@@ -145,9 +149,9 @@ export class SeriesService {
         }).catch(() => { }); // Don't block on failure
 
         // Cache for 10 minutes
-        await cacheService.set(cacheKey, series, 600);
+        await cacheService.set(cacheKey, formatted, 600);
 
-        return series;
+        return formatted;
     }
 
     async getSeriesBySlug(slug: string) {
@@ -166,7 +170,7 @@ export class SeriesService {
         const series = await prisma.series.update({
             where: { id },
             data: {
-                ...data,
+                ...this.prepareData(data),
                 ...(data.title && { slug: this.generateUniqueSlug(data.title) }),
             },
             include: {
@@ -182,7 +186,7 @@ export class SeriesService {
         // Invalidate cache
         await this.invalidateSeriesCache(id);
 
-        return series;
+        return this.formatSeries(series);
     }
 
     async deleteSeries(id: string) {
@@ -196,6 +200,29 @@ export class SeriesService {
     }
 
 
+
+    private prepareData(data: any) {
+        const prepared = { ...data };
+        if (dbProvider.type === 'sqlite') {
+            if (prepared.alternativeTitles !== undefined) {
+                prepared.alternativeTitles = dbProvider.stringifyArray(prepared.alternativeTitles);
+            }
+            if (prepared.tags !== undefined) {
+                prepared.tags = dbProvider.stringifyArray(prepared.tags);
+            }
+        }
+        return prepared;
+    }
+
+    private formatSeries(series: any) {
+        if (!series) return series;
+        const formatted = { ...series };
+        if (dbProvider.type === 'sqlite') {
+            formatted.alternativeTitles = dbProvider.parseArray(formatted.alternativeTitles);
+            formatted.tags = dbProvider.parseArray(formatted.tags);
+        }
+        return formatted;
+    }
 
     private generateUniqueSlug(title: string): string {
         const baseSlug = slugify(title, { lower: true, strict: true });

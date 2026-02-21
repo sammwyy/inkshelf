@@ -1,4 +1,4 @@
-import { prisma } from '@/database';
+import { prisma, dbProvider } from '@/database/provider';
 import { Prisma } from '@prisma/client';
 import { StorageService } from '@/services/storage/storage.service';
 import { NotFoundError, BadRequestError } from '@/utils/errors';
@@ -56,7 +56,7 @@ export class ChaptersService {
 
         const chapter = await prisma.chapter.create({
             data: {
-                ...data,
+                ...this.prepareData(data),
                 publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
             }
         });
@@ -64,7 +64,7 @@ export class ChaptersService {
         // Update series stats (optional, could be async or scheduled)
         // await this.updateSeriesStats(data.seriesId); 
 
-        return chapter;
+        return this.formatChapter(chapter);
     }
 
     async getChapter(id: string) {
@@ -86,6 +86,8 @@ export class ChaptersService {
             throw new NotFoundError('Chapter not found');
         }
 
+        const formatted = this.formatChapter(chapter);
+
         // Increment view count (async)
         // Check if DB writes are cheap/batched. For now just fire and forget.
         prisma.chapter.update({
@@ -93,7 +95,7 @@ export class ChaptersService {
             data: { viewCount: { increment: 1 } },
         }).catch(() => { });
 
-        return chapter;
+        return formatted;
     }
 
     async getChapters(seriesId: string, query: GetChaptersQueryDto) {
@@ -116,8 +118,10 @@ export class ChaptersService {
             prisma.chapter.count({ where }),
         ]);
 
+        const formattedChapters = chapters.map(c => this.formatChapter(c));
+
         return {
-            data: chapters,
+            data: formattedChapters,
             pagination: {
                 page,
                 limit,
@@ -135,13 +139,13 @@ export class ChaptersService {
         const updated = await prisma.chapter.update({
             where: { id },
             data: {
-                ...data,
+                ...this.prepareData(data),
                 publishedAt: data.publishedAt ? new Date(data.publishedAt) : undefined,
                 pageCount: data.pages ? data.pages.length : undefined,
             },
         });
 
-        return updated;
+        return this.formatChapter(updated);
     }
 
     async deleteChapter(id: string) {
@@ -174,8 +178,9 @@ export class ChaptersService {
         const chapter = await prisma.chapter.findUnique({ where: { id } });
         if (!chapter) throw new NotFoundError('Chapter not found');
 
+        const currentPages = dbProvider.parseArray<string>(chapter.pages);
         const pageUrls: string[] = [];
-        const startOffset = chapter.pages.length;
+        const startOffset = currentPages.length;
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -189,12 +194,31 @@ export class ChaptersService {
         const updated = await prisma.chapter.update({
             where: { id },
             data: {
-                pages: [...chapter.pages, ...pageUrls],
-                pageCount: chapter.pages.length + pageUrls.length,
+                pages: dbProvider.stringifyArray([...currentPages, ...pageUrls]),
+                pageCount: currentPages.length + pageUrls.length,
             },
         });
 
-        return updated;
+        return this.formatChapter(updated);
+    }
+
+    private prepareData(data: any) {
+        const prepared = { ...data };
+        if (dbProvider.type === 'sqlite') {
+            if (prepared.pages !== undefined) {
+                prepared.pages = dbProvider.stringifyArray(prepared.pages);
+            }
+        }
+        return prepared;
+    }
+
+    private formatChapter(chapter: any) {
+        if (!chapter) return chapter;
+        const formatted = { ...chapter };
+        if (dbProvider.type === 'sqlite') {
+            formatted.pages = dbProvider.parseArray(formatted.pages);
+        }
+        return formatted;
     }
 }
 
